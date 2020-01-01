@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/tx
+       http://www.springframework.org/schema/tx/spring-tx.xsd">
+    <!--开启IOC的注解支持-->
+    <context:component-scan base-package="cn.appsys.service"/>
+    <!--读取properties文件-->
+    <context:property-placeholder location="classpath:database.properties"/>
+    <!--配置数据源-->
+    <bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource">
+        <property name="driverClassName" value="${mysql.driver}"/>
+        <property name="url" value="${mysql.url}"/>
+        <property name="username" value="${mysql.username}"/>
+        <property name="password" value="${mysql.password}"/>
+        <property name="initialSize" value="${initialSize}"/>
+        <property name="maxIdle" value="${maxIdle}"/>
+        <property name="minIdle" value="${minIdle}"/>
+        <property name="maxWaitMillis" value="${maxWait}"/>
+        <property name="removeAbandonedTimeout" value="${removeAbandonedTimeout}"/>
+        <property name="removeAbandonedOnBorrow" value="${removeAbandoned}"/>
+        <!--SQL心跳 保证连接池中的连接是真实有效的-->
+        <!--开启Evict的定时校验，循环校验-->
+        <property name="testWhileIdle" value="true"/>
+        <!--定义Evict的时间间隔，单位：毫秒-->
+        <property name="timeBetweenEvictionRunsMillis" value="60000"/>
+        <!--在进行borrowObject处理时，会对拿到的连接进行校验-false-->
+        <property name="testOnBorrow" value="false"/>
+        <!--在进行returnObject处理时，会对返回的连接进行校验-false-->
+        <property name="testOnReturn" value="false"/>
+        <!--校验使用的SQL语句，validationQuery，复杂的教研SQL会影响性能-->
+        <property name="validationQuery" value="select 1"/>
+        <!--配置每次校验连接的数量，一般等于maxActive-->
+        <property name="numTestsPerEvictionRun" value="${maxActive}"/>
+    </bean>
+    <!--配置mybatis的核心类-->
+    <bean id="sqlSessionFactoryBean" class="com.baomidou.mybatisplus.spring.MybatisSqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="typeAliasesPackage" value="cn.smbms.pojo"/>
+        <property name="mapperLocations" value="classpath:mapper/*.xml"/>
+        <property name="plugins" ref="pageInterceptor"/><!--分页拦截器-->
+        <!--<property name="globalConfig" ref="globalConfiguration"/>--><!--全局策略配置-->
+    </bean>
+    <!--全局策略配置-->
+    <!--<bean id="globalConfiguration" class="com.baomidou.mybatisplus.entity.GlobalConfiguration">
+        <property name="idType" value="0"/>
+        <property name="tablePrefix" value="smbms_"/>
+        <property name="capitalMode" value="true"/>
+    </bean>-->
+    <!--分页拦截器-->
+    <bean id="pageInterceptor" class="com.baomidou.mybatisplus.plugins.PaginationInterceptor">
+        <property name="properties">
+            <props>
+                <prop key="reasonable">true</prop>
+            </props>
+        </property>
+    </bean>
+    <!--接口和mapper的映射-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactoryBean"/>
+        <property name="basePackage" value="cn.smbms.dao"/>
+    </bean>
+    <!--事务-->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    <!--开启事务的注解支持-->
+    <tx:annotation-driven/>
+</beans>
