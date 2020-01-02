@@ -15,4 +15,6 @@ public class DevUserController {
     public String login(){
         return "devlogin";
     }
+    @RequestMapping("/longinto")
+    public String longinto(){return "backendlog";}
 }
