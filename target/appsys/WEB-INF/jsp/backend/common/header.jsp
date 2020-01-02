@@ -1,5 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8"%>
+    pageEncoding="UTF-8" isELIgnored="false" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
 <!DOCTYPE html>
@@ -48,7 +48,7 @@
               </div>
               <div class="profile_info">
                 <span>Welcome,</span>
-                <h2>${userSession.userCode }</h2>
+                <h2>${userSession.usercode }</h2>
               </div>
             </div>
             <!-- /menu profile quick info -->
@@ -58,7 +58,7 @@
             <!-- sidebar menu -->
             <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
               <div class="menu_section">
-                <h3>${userSession.userName }</h3>
+                <h3>${userSession.username }</h3>
                 <ul class="nav side-menu">
                   <li><a><i class="fa fa-home"></i> APP管理 <span class="fa fa-chevron-down"></span></a>
                     <ul class="nav child_menu">
@@ -115,7 +115,7 @@
               <ul class="nav navbar-nav navbar-right">
                 <li class="">
                   <a href="javascript:;" class="user-profile dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                    <img src="${pageContext.request.contextPath }/statics/images/img.jpg" alt="">${userSession.userCode }
+                    <img src="${pageContext.request.contextPath }/statics/images/img.jpg" alt="">${userSession.usercode }
                     <span class=" fa fa-angle-down"></span>
                   </a>
                   <ul class="dropdown-menu dropdown-usermenu pull-right">

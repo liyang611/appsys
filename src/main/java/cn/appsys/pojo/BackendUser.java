@@ -1,5 +1,6 @@
 package cn.appsys.pojo;
 
+import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
 import lombok.Data;
 
@@ -11,7 +12,7 @@ import java.util.Date;
  * @author 
  */
 @Data
-@TableName("backen_duser")
+@TableName("backend_user")
 public class BackendUser implements Serializable {
     /**
      * 主键id
@@ -57,6 +58,8 @@ public class BackendUser implements Serializable {
      * 用户密码
      */
     private String userpassword;
+    @TableField(exist = false)
+    private DataDictionary dataDictionary;
 
     private static final long serialVersionUID = 1L;
 
