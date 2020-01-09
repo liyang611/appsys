@@ -1,10 +1,10 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
-	pageEncoding="UTF-8"%>
+	pageEncoding="UTF-8" isELIgnored="false" %>
 <%@include file="common/header.jsp"%>
 <div class="page-title">
 	<div class="title_left">
 		<h3>
-			欢迎你：${devUserSession.devName }<strong> | 角色：开发者账户</strong>
+			欢迎你：${devUserSession.devname }<strong> | 角色：开发者账户</strong>
 		</h3>
 	</div>
 </div>

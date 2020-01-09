@@ -1,5 +1,6 @@
 package cn.appsys.pojo;
 
+import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
 import lombok.Data;
 
@@ -9,7 +10,8 @@ import java.util.Date;
 
 /**
  * app_info
- * @author 
+ *
+ * @author
  */
 @Data
 @TableName("app_info")
@@ -133,6 +135,18 @@ public class AppInfo implements Serializable {
      * 最新的版本id
      */
     private Long versionid;
+    @TableField(exist = false)
+    private String flatformname;
+    @TableField(exist = false)
+    private String statusname;
+    @TableField(exist = false)
+    private String categorylevel1name;
+    @TableField(exist = false)
+    private String categorylevel2name;
+    @TableField(exist = false)
+    private String categorylevel3name;
+    @TableField(exist = false)
+    private String versionno;
 
     private static final long serialVersionUID = 1L;
 

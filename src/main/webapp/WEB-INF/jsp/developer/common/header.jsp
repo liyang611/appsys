@@ -1,5 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
-	pageEncoding="UTF-8"%>
+	pageEncoding="UTF-8" isELIgnored="false" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
 <!DOCTYPE html>
@@ -39,7 +39,7 @@
 			<div class="col-md-3 left_col menu_fixed">
 				<div class="left_col scroll-view">
 					<div class="navbar nav_title" style="border: 0;">
-						<a href="${pageContext.request.contextPath }/dev/flatform/main" class="site_title"><i class="fa fa-paw"></i> <span>APP
+						<a href="${pageContext.request.contextPath }/dev/main" class="site_title"><i class="fa fa-paw"></i> <span>APP
 								BMS</span>
 						</a>
 					</div>
@@ -55,7 +55,7 @@
 						</div>
 						<div class="profile_info">
 							<span>Welcome,</span>
-							<h2>${devUserSession.devCode }</h2>
+							<h2>${devUserSession.devcode }</h2>
 						</div>
 					</div>
 					<!-- /menu profile quick info -->
@@ -66,7 +66,7 @@
 					<div id="sidebar-menu"
 						class="main_menu_side hidden-print main_menu">
 						<div class="menu_section">
-							<h3>${devUserSession.devName }</h3>
+							<h3>${devUserSession.devname }</h3>
 							<ul class="nav side-menu">
 								<li><a><i class="fa fa-home"></i> APP账户管理 <span
 										class="fa fa-chevron-down"></span>
@@ -81,7 +81,7 @@
 										class="fa fa-chevron-down"></span>
 								</a>
 									<ul class="nav child_menu">
-										<li><a href="${pageContext.request.contextPath }/dev/flatform/app/list">APP维护</a>
+										<li><a href="${pageContext.request.contextPath }/dev/app/list">APP维护</a>
 										</li>
 									</ul></li>
 							</ul>
@@ -121,7 +121,7 @@
 								class="user-profile dropdown-toggle" data-toggle="dropdown"
 								aria-expanded="false"> <img
 									src="${pageContext.request.contextPath }/statics/images/img.jpg"
-									alt="">${devUserSession.devCode } <span
+									alt="">${devUserSession.devcode } <span
 									class=" fa fa-angle-down"></span> </a>
 								<ul class="dropdown-menu dropdown-usermenu pull-right">
 									<li><a

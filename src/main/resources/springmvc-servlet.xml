@@ -38,6 +38,11 @@
             </props>
         </property>
     </bean>
+    <!--上传文件解析器-->
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <property name="maxUploadSize" value="500000000"/>
+        <property name="defaultEncoding" value="UTF-8"/>
+    </bean>
     <!--拦截器-->
     <!--<mvc:interceptors>
         <mvc:interceptor>

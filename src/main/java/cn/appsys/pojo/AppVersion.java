@@ -1,5 +1,6 @@
 package cn.appsys.pojo;
 
+import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
 import lombok.Data;
 
@@ -78,6 +79,10 @@ public class AppVersion implements Serializable {
      * 上传的apk文件名称
      */
     private String apkfilename;
+    @TableField(exist = false)
+    private String appname;
+    @TableField(exist = false)
+    private String publishstatusname;
 
     private static final long serialVersionUID = 1L;
 
