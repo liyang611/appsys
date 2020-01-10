@@ -32,4 +32,9 @@ public class AppVersionServiceImpl implements AppVersionService {
         }
         return appVersionList;
     }
+
+    @Override
+    public AppVersion selectById(Long id) {
+        return appVersionMapper.selectById(id);
+    }
 }

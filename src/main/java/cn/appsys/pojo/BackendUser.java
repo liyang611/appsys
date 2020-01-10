@@ -59,7 +59,7 @@ public class BackendUser implements Serializable {
      */
     private String userpassword;
     @TableField(exist = false)
-    private DataDictionary dataDictionary;
+    private String usertypename;
 
     private static final long serialVersionUID = 1L;
 

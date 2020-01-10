@@ -1,13 +1,7 @@
 package cn.appsys.controller;
 
-import cn.appsys.pojo.AppCategory;
-import cn.appsys.pojo.AppInfo;
-import cn.appsys.pojo.BackendUser;
-import cn.appsys.pojo.DataDictionary;
-import cn.appsys.service.AppCategoryService;
-import cn.appsys.service.AppInfoService;
-import cn.appsys.service.BakendUserService;
-import cn.appsys.service.DataDictionaryService;
+import cn.appsys.pojo.*;
+import cn.appsys.service.*;
 import com.baomidou.mybatisplus.plugins.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,6 +30,8 @@ public class BackendController {
     private AppInfoService appInfoService;
     @Resource
     private AppCategoryService appCategoryService;
+    @Resource
+    private AppVersionService appVersionService;
 
     @RequestMapping(value = "dologin", method = RequestMethod.POST)
     public String daolongin(HttpSession session, String userCode, String userPassword) {
@@ -44,8 +40,6 @@ public class BackendController {
             session.setAttribute("error", "用户名或密码错误");
             return "redirect:/backend/login";
         } else {
-            DataDictionary dataDictionary = dataDictionaryService.selectUserType(user.getUsertype());
-            user.setDataDictionary(dataDictionary);
             session.removeAttribute("error");
             session.setAttribute("userSession", user);
             return "redirect:/backend/main";
@@ -93,5 +87,23 @@ public class BackendController {
     @ResponseBody
     public Object categorylevellist(Long pid) {
         return appCategoryService.selectAppCategories(pid);
+    }
+
+    @RequestMapping("/app/check")
+    public String appCheck(HttpSession session, Long aid, Long vid) {
+        AppInfo appInfo = appInfoService.selectById(aid);
+        AppVersion appVersion = appVersionService.selectById(vid);
+        session.setAttribute("appInfo", appInfo);
+        session.setAttribute("appVersion", appVersion);
+        return "backend/appcheck";
+    }
+
+    @RequestMapping("/app/checksave")
+    public String checkSave(AppInfo appInfo) {
+        if (appInfoService.modify(appInfo)) {
+            return "redirect:/backend/app/list";
+        } else {
+            return "backend/appcheck";
+        }
     }
 }

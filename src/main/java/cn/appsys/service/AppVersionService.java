@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface AppVersionService {
     List<AppVersion> selectByAppId(Long appId);
+    AppVersion selectById(Long id);
 }
