@@ -3,10 +3,11 @@ package cn.appsys.controller;
 import cn.appsys.pojo.*;
 import cn.appsys.service.*;
 import cn.appsys.tools.ApkNameData;
-import cn.appsys.tools.DelData;
+import cn.appsys.tools.ResultData;
 import com.baomidou.mybatisplus.plugins.Page;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -201,24 +202,38 @@ public class DevUserController {
 
     @RequestMapping("/delfile")
     @ResponseBody
-    public Object delFile(@RequestParam(required = false) Long id) {
-        DelData delData = new DelData();
-        if (id == null || id == 0) {
-            delData.setResult("failed");
-        } else {
-            String fileLocPath = appInfoService.selectById(id).getLogolocpath();
+    public Object delFile(@RequestParam(required = false) Long id,
+                          @RequestParam(required = false) String flag) {
+        ResultData resultData = new ResultData();
+        String fileLocPath;
+        if (flag == null || "".equals(flag) || id == null || id == 0) {
+            resultData.setResult("failed");
+        } else if ("logo".equals(flag)) {
+            fileLocPath = appInfoService.selectById(id).getLogolocpath();
             File file = new File(fileLocPath);
             if (file.exists()) {
                 if (file.delete()) {
                     if (appInfoService.deleteFile(id)) {
-                        delData.setResult("success");
+                        resultData.setResult("success");
                     }
                 }
             } else {
-                delData.setResult("failed");
+                resultData.setResult("failed");
+            }
+        } else if ("apk".equals(flag)) {
+            fileLocPath = appVersionService.selectById(id).getApklocpath();
+            File file = new File(fileLocPath);
+            if (file.exists()) {
+                if (file.delete()) {
+                    if (appVersionService.deleteFile(id)) {
+                        resultData.setResult("success");
+                    }
+                }
+            } else {
+                resultData.setResult("failed");
             }
         }
-        return delData;
+        return resultData;
     }
 
     @RequestMapping("/app/appinfomodifysave")
@@ -258,5 +273,170 @@ public class DevUserController {
             return "redirect:/dev/app/list";
         }
         return "developer/appinfomodify";
+    }
+
+    @RequestMapping("/delapp")
+    @ResponseBody
+    public Object delApp(Long id) {
+        ResultData resultData = new ResultData();
+        AppInfo appInfo = appInfoService.selectById(id);
+        if (appInfo == null) {
+            resultData.setDelResult("notexist");
+        } else {
+            if (appInfoService.deleteById(id)) {
+                resultData.setDelResult("true");
+            } else {
+                resultData.setDelResult("false");
+            }
+        }
+        return resultData;
+    }
+
+    @RequestMapping("/app/appversionadd")
+    public String appVersionAdd(Model model, Long id, AppVersion appVersion, @RequestParam(required = false) String error) {
+        if (error != null && "error1".equals(error)) {
+            error = "APK信息不完整";
+        } else if (error != null && "error2".equals(error)) {
+            error = "上传失败";
+        } else if (error != null && "error3".equals(error)) {
+            error = "上传文件格式不正确";
+        }
+        appVersion.setAppid(id);
+        List<AppVersion> appVersionList = appVersionService.selectByAppId(id);
+        model.addAttribute("appVersionList", appVersionList);
+        model.addAttribute(appVersion);
+        model.addAttribute("fileUploadError", error);
+        return "developer/appversionadd";
+    }
+
+    @RequestMapping("/app/addversionsave")
+    public String addVersionSave(AppVersion appVersion, HttpServletRequest request, @RequestParam(required = false) MultipartFile a_downloadLink) {
+        String downloadLink = null;
+        String apkLocPath = null;
+        String apkFileName = null;
+        if (!a_downloadLink.isEmpty()) {
+            String path = request.getSession().getServletContext().getRealPath("statics" + File.separator + "uploadfiles");
+            String oldFileName = a_downloadLink.getOriginalFilename();
+            String prefix = FilenameUtils.getExtension(oldFileName);
+            if ("apk".equalsIgnoreCase(prefix)) {
+                String apkname = appInfoService.selectById(appVersion.getAppid()).getApkname();
+                if (apkname == null || "".equals(apkname)) {
+                    return "redirect:/dev/app/appversionadd?id=" + appVersion.getAppid() + "&error=error1";
+                }
+                apkFileName = apkname + "-" + appVersion.getVersionno() + ".apk";
+                File targetFile = new File(path, apkFileName);
+                if (!targetFile.exists()) {
+                    targetFile.mkdirs();
+                }
+                try {
+                    a_downloadLink.transferTo(targetFile);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return "redirect:/dev/app/appversionadd?id=" + appVersion.getAppid() + "&error=error2";
+                }
+                downloadLink = request.getContextPath() + "/statics/uploadfiles/" + apkFileName;
+                apkLocPath = path + File.separator + apkFileName;
+            } else {
+                return "redirect:/dev/app/appversionadd?id=" + appVersion.getAppid() + "&error=error3";
+            }
+        }
+        appVersion.setCreatedby(((DevUser) request.getSession().getAttribute("devUserSession")).getId());
+        appVersion.setCreationdate(new Date());
+        appVersion.setDownloadlink(downloadLink);
+        appVersion.setApklocpath(apkLocPath);
+        appVersion.setApkfilename(apkFileName);
+        if (appVersionService.add(appVersion)) {
+            return "redirect:/dev/app/list";
+        } else {
+            return "redirect:/dev/app/appversionadd?id=" + appVersion.getAppid();
+        }
+    }
+
+    @RequestMapping("/app/appversionmodify")
+    public String appVersionModify(Long vid, Long aid, @RequestParam(required = false) String error, Model model) {
+        if (error != null && "error1".equals(error)) {
+            error = "APK信息不完整";
+        } else if (error != null && "error2".equals(error)) {
+            error = "上传失败";
+        } else if (error != null && "error3".equals(error)) {
+            error = "上传文件格式不正确";
+        }
+        AppVersion appVersion = appVersionService.selectById(vid);
+        List<AppVersion> appVersionList = appVersionService.selectByAppId(aid);
+        model.addAttribute("appVersionList", appVersionList);
+        model.addAttribute("appVersion", appVersion);
+        model.addAttribute("fileUploadError", error);
+        return "developer/appversionmodify";
+    }
+
+    @RequestMapping("/app/appversionmodifysave")
+    public String appVersionModifySave(AppVersion appVersion, HttpServletRequest request, @RequestParam(required = false) MultipartFile attach) {
+        String downloadLink = null;
+        String apkLocPath = null;
+        String apkFileName = null;
+        if (!attach.isEmpty()) {
+            String path = request.getSession().getServletContext().getRealPath("statics" + File.separator + "uploadfiles");
+            String oldFileName = attach.getOriginalFilename();
+            String prefix = FilenameUtils.getExtension(oldFileName);
+            if ("apk".equalsIgnoreCase(prefix)) {
+                String apkname = appInfoService.selectById(appVersion.getAppid()).getApkname();
+                if (apkname == null || "".equals(apkname)) {
+                    return "redirect:/dev/app/appversionmodify?vid=" + appVersion.getId() + "&aid=" + appVersion.getAppid() + "&error=error1";
+                }
+                apkFileName = apkname + "-" + appVersion.getVersionno() + ".apk";
+                File targetFile = new File(path, apkFileName);
+                if (!targetFile.exists()) {
+                    targetFile.mkdirs();
+                }
+                try {
+                    attach.transferTo(targetFile);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return "redirect:/dev/app/appversionmodify?vid=" + appVersion.getId() + "&aid=" + appVersion.getAppid() + "&error=error2";
+                }
+                downloadLink = request.getContextPath() + "/statics/uploadfiles/" + apkFileName;
+                apkLocPath = path + File.separator + apkFileName;
+            } else {
+                return "redirect:/dev/app/appversionmodify?vid=" + appVersion.getId() + "&aid=" + appVersion.getAppid() + "&error=error3";
+            }
+        }
+        appVersion.setCreatedby(((DevUser) request.getSession().getAttribute("devUserSession")).getId());
+        appVersion.setCreationdate(new Date());
+        appVersion.setDownloadlink(downloadLink);
+        appVersion.setApklocpath(apkLocPath);
+        appVersion.setApkfilename(apkFileName);
+        if (appVersionService.modify(appVersion)) {
+            return "redirect:/dev/app/list";
+        } else {
+            return "redirect:/dev/app/appversionmodify?vid=" + appVersion.getId() + "&aid=" + appVersion.getAppid();
+        }
+    }
+
+    @RequestMapping(value = "/{appId}/sale", method = RequestMethod.PUT)
+    @ResponseBody
+    public Object sale(@PathVariable String appId, HttpSession session) {
+        ResultData resultData = new ResultData();
+        long id;
+        try {
+            id = Long.parseLong(appId);
+        } catch (Exception e) {
+            id = 0L;
+        }
+        resultData.setErrorCode("0");
+        if (id > 0) {
+            try {
+                DevUser devUser = (DevUser) session.getAttribute("devUserSession");
+                if (appInfoService.updateSaleStatus(id, devUser)) {
+                    resultData.setResultMsg("success");
+                } else {
+                    resultData.setResultMsg("failed");
+                }
+            } catch (Exception e) {
+                resultData.setErrorCode("exception000001");
+            }
+        } else {
+            resultData.setErrorCode("param000001");
+        }
+        return resultData;
     }
 }

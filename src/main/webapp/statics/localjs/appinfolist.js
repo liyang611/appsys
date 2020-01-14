@@ -103,7 +103,7 @@ $(document).on("click",".saleSwichOpen,.saleSwichClose",function(){
 var saleSwitchAjax = function(appId,obj){
 	$.ajax({
 		type:"PUT",
-		url:appId+"/sale.json",
+		url:"/dev/"+appId+"/sale",
 		dataType:"json",
 		success:function(data){
 			/*
@@ -116,38 +116,48 @@ var saleSwitchAjax = function(appId,obj){
 				if(data.resultMsg === "success"){//操作成功
 					if("open" === obj.attr("saleSwitch")){
 						//alert("恭喜您，【"+obj.attr("appsoftwarename")+"】的【上架】操作成功");
-						$("#appInfoStatus" + obj.attr("appinfoid")).html("已上架");
-						obj.className="saleSwichClose";
-						obj.html("下架");
-						obj.attr("saleSwitch","close");
-						$("#appInfoStatus" + obj.attr("appinfoid")).css({
+						$("#appInfoStatus" + obj.attr("appinfoid")).html("已上架").css({
 							'background':'green',
 							'color':'#fff',
 							'padding':'3px',
 							'border-radius':'3px'
 						});
+						obj.className="saleSwichClose";
+						obj.html("下架");
+						obj.attr("saleSwitch","close");
+						/*$("#appInfoStatus" + obj.attr("appinfoid")).css({
+							'background':'green',
+							'color':'#fff',
+							'padding':'3px',
+							'border-radius':'3px'
+						});*/
 						$("#appInfoStatus" + obj.attr("appinfoid")).hide();
 						$("#appInfoStatus" + obj.attr("appinfoid")).slideDown(300);
 					}else if("close" === obj.attr("saleSwitch")){
 						//alert("恭喜您，【"+obj.attr("appsoftwarename")+"】的【下架】操作成功");
-						$("#appInfoStatus" + obj.attr("appinfoid")).html("已下架");
-						obj.className="saleSwichOpem";
-						obj.html("上架");
-						obj.attr("saleSwitch","open");
-						$("#appInfoStatus" + obj.attr("appinfoid")).css({
+						$("#appInfoStatus" + obj.attr("appinfoid")).html("已下架").css({
 							'background':'red',
 							'color':'#fff',
 							'padding':'3px',
 							'border-radius':'3px'
 						});
+						obj.className="saleSwichOpem";
+						obj.html("上架");
+						obj.attr("saleSwitch","open");
+						/*$("#appInfoStatus" + obj.attr("appinfoid")).css({
+							'background':'red',
+							'color':'#fff',
+							'padding':'3px',
+							'border-radius':'3px'
+						});*/
 						$("#appInfoStatus" + obj.attr("appinfoid")).hide();
 						$("#appInfoStatus" + obj.attr("appinfoid")).slideDown(300);
 					}
 				}else if(data.resultMsg === "failed"){//删除失败
 					if("open" === obj.attr("saleSwitch")){
-						alert("恭喜您，【"+obj.attr("appsoftwarename")+"】的【上架】操作失败");
+						alert("【"+obj.attr("appsoftwarename")+"】的【上架】操作失败");
 					}else if("close" === obj.attr("saleSwitch")){
-						alert("恭喜您，【"+obj.attr("appsoftwarename")+"】的【下架】操作失败");
+						alert("【"+obj.attr("appsoftwarename")+"】的【下架】操作失败");
 					}
 				}
 			}else{
@@ -180,7 +190,7 @@ $(".deleteApp").on("click",function(){
 	if(confirm("你确定要删除APP应用【"+obj.attr("appsoftwarename")+"】及其所有的版本吗？")){
 		$.ajax({
 			type:"GET",
-			url:"delapp.json",
+			url:"/dev/delapp",
 			data:{id:obj.attr("appinfoid")},
 			dataType:"json",
 			success:function(data){

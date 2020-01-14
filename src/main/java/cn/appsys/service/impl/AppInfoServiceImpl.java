@@ -7,6 +7,7 @@ import cn.appsys.dao.DataDictionaryMapper;
 import cn.appsys.pojo.AppInfo;
 import cn.appsys.pojo.AppVersion;
 import cn.appsys.pojo.DataDictionary;
+import cn.appsys.pojo.DevUser;
 import cn.appsys.service.AppInfoService;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -90,25 +92,15 @@ public class AppInfoServiceImpl implements AppInfoService {
         if (appInfo == null) {
             return false;
         } else {
-            appInfo.setLogopicpath(null);
-            appInfo.setLogolocpath(null);
-            Integer i = appInfoMapper.updateById(appInfo);
-            if (i == 0) {
-                return false;
-            } else {
-                return true;
-            }
+            appInfo.setLogopicpath("");
+            appInfo.setLogolocpath("");
+            return appInfoMapper.updateById(appInfo) > 0;
         }
     }
 
     @Override
     public Boolean add(AppInfo appInfo) {
-        Integer i = appInfoMapper.insert(appInfo);
-        if (i == 0) {
-            return false;
-        } else {
-            return true;
-        }
+        return appInfoMapper.insert(appInfo) > 0;
     }
 
     @Override
@@ -118,11 +110,66 @@ public class AppInfoServiceImpl implements AppInfoService {
 
     @Override
     public Boolean modify(AppInfo appInfo) {
-        Integer i = appInfoMapper.updateById(appInfo);
-        if (i == 0) {
+        return appInfoMapper.updateById(appInfo) > 0;
+    }
+
+    @Override
+    public Boolean deleteById(Long id) {
+        List<AppVersion> appVersionList = appVersionMapper.selectList(new EntityWrapper<AppVersion>().eq("appId", id));
+        if (!appVersionList.isEmpty()) {
+            appVersionMapper.deleteBatchIds(appVersionList);
+        }
+        return appInfoMapper.deleteById(id) > 0;
+    }
+
+    @Override
+    public Boolean updateSaleStatus(Long appId, DevUser devUser) throws Exception {
+        AppInfo appInfo = appInfoMapper.selectById(appId);
+        Long operator = devUser.getId();
+        if (operator < 0 || appId < 0) {
+            throw new Exception();
+        }
+        if (appInfo == null) {
             return false;
         } else {
-            return true;
+            int status = appInfo.getStatus().intValue();
+            switch (status) {
+                case 2:
+                case 5:
+                    onSale(appInfo, operator, 4L, 2L);
+                    break;
+                case 4:
+                    offSale(appInfo, operator, 5L);
+                    break;
+                default:
+                    return false;
+            }
         }
+        return true;
+    }
+
+    private void onSale(AppInfo appInfo, Long operator, Long appInfoStatus, Long versionStatus) {
+        offSale(appInfo, operator, appInfoStatus);
+        setSaleSwitchToAppVersion(appInfo, operator, versionStatus);
+    }
+
+    private Boolean offSale(AppInfo appInfo, Long operator, Long appInfoStatus) {
+        AppInfo _appInfo = new AppInfo();
+        _appInfo.setId(appInfo.getId());
+        _appInfo.setStatus(appInfoStatus);
+        _appInfo.setModifyby(operator);
+        _appInfo.setOffsaledate(new Date(System.currentTimeMillis()));
+        appInfoMapper.updateById(_appInfo);
+        return true;
+    }
+
+    private Boolean setSaleSwitchToAppVersion(AppInfo appInfo, Long operator, Long saleStatus) {
+        AppVersion appVersion = new AppVersion();
+        appVersion.setId(appInfo.getVersionid());
+        appVersion.setPublishstatus(saleStatus);
+        appVersion.setModifyby(operator);
+        appVersion.setModifydate(new Date(System.currentTimeMillis()));
+        appVersionMapper.updateById(appVersion);
+        return true;
     }
 }
