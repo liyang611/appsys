@@ -13,15 +13,12 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
 import java.util.List;
 
+/**
+ * @author 后台管理
+ */
 @Controller
 @RequestMapping("/backend")
-/*后台管理*/
 public class BackendController {
-    @RequestMapping("/login")
-    public String login() {
-        return "backendlogin";
-    }
-
     @Resource
     private BakendUserService bakendUserService;
     @Resource
@@ -33,8 +30,13 @@ public class BackendController {
     @Resource
     private AppVersionService appVersionService;
 
+    @RequestMapping("/login")
+    public String login() {
+        return "backendlogin";
+    }
+
     @RequestMapping(value = "dologin", method = RequestMethod.POST)
-    public String daolongin(HttpSession session, String userCode, String userPassword) {
+    public String doLogin(HttpSession session, String userCode, String userPassword) {
         BackendUser user = bakendUserService.login(userCode, userPassword);
         if (user == null) {
             session.setAttribute("error", "用户名或密码错误");
